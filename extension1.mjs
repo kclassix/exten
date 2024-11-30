@@ -9,9 +9,9 @@ const sleep = (milliseconds) => {
 }
 
 let userDocument = app.getPath('documents');
-let extensionPath = userDocument + 'Documents' + '/dist/extension';
-const filename = userDocument + 'Documents' + '/name-proxy-email.json';
-const nameProxyList = userDocument + 'Documents' + '/name-proxy.json';
+let extensionPath = userDocument + '/Documents' + '/dist/extension';
+const filename = userDocument + '/Documents' + '/name-proxy-email.json';
+const nameProxyList = userDocument + '/Documents' + '/name-proxy.json';
 let newOneFormaCredential;
 
 async function createNewEmail(registerData, gotNewData) {
@@ -22,7 +22,7 @@ async function createNewEmail(registerData, gotNewData) {
     let chromeProfile = 'Person ' + registerData[0].profile;
     const chrome = await chromeLauncher.launch({
         ignoreDefaultFlags: true,
-        chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + 'Documents' + chromeDir, "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
+        chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + '/Documents' + chromeDir, "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
     });
     const browserURL = `http://localhost:${chrome.port}`;
     const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
@@ -461,8 +461,8 @@ async function continueOneForma(page, userDetails, gotNewData) {
                     });
                 }
 
-                const nameProxyList = userDocument + 'Documents' + '/name-proxy-email.json';
-                const filename = userDocument + 'Documents' + '/oneformaCredentials.json';
+                const nameProxyList = userDocument + '/Documents' + '/name-proxy-email.json';
+                const filename = userDocument + '/Documents' + '/oneformaCredentials.json';
 
                 modifyJsonFile(filename, registedUser);
 
@@ -643,8 +643,8 @@ export default async function extension1(userDetailsArray, createEmail, gotNewDa
                             });
                         }
 
-                        const nameProxyList = userDocument + 'Documents' + '/name-proxy-email.json';
-                        const filename = userDocument + 'Documents' + '/oneformaCredentials.json';
+                        const nameProxyList = userDocument + '/Documents' + '/name-proxy-email.json';
+                        const filename = userDocument + '/Documents' + '/oneformaCredentials.json';
 
                         modifyJsonFile(filename, registedUser);
 
