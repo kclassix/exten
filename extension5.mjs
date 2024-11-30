@@ -506,27 +506,25 @@ async function initIproyal(countryList, gotNewData) {
 
             async function modifyJsonFile(filename, newData) {
 
-                await sleep(2000)
-                fs.readFile(filename, 'utf8', (err, data) => {
+    // await sleep(2000)
+            fs.readFile(filename, 'utf8', (err, data) => {
+                if (err) {
+                    console.error('Error reading file:', err);
+                    return;
+                }
+        
+                let jsonData = JSON.parse(data);
+                jsonData.push(newData);
+        
+                fs.writeFile(filename, JSON.stringify(jsonData, null, 2), (err) => {
                     if (err) {
-                        console.error('Error reading file:', err);
-                        return;
+                        console.error('Error writing file:', err);
+                    } else {
+                        console.log(newData, ' added successfully!');
                     }
-
-                    let jsonData = JSON.parse(data);
-                    jsonData.push(newData);
-
-                    fs.writeFile(filename, JSON.stringify(jsonData, null, 2), async (err) => {
-                        if (err) {
-                            console.error('Error writing file:', err);
-                        } else {
-                            // console.log(newData, ' added successfully!');
-
-                            gotNewData('omo');
-                        }
-                    });
                 });
-            }
+            });
+        }
 
             modifyJsonFile(filename, wholeData);
         }, 20000 * i);
