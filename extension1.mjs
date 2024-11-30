@@ -10,8 +10,8 @@ const sleep = (milliseconds) => {
 
 let userDocument = app.getPath('documents');
 let extensionPath = userDocument + '/dist/extension';
-const filename = userDocument + '/name-proxy-email.json';
-const nameProxyList = userDocument + '/name-proxy.json';
+const filename = 'file:///' + userDocument + '/name-proxy-email.json';
+const nameProxyList = 'file:///' + userDocument + '/name-proxy.json';
 let newOneFormaCredential;
 
 async function createNewEmail(registerData, gotNewData) {
@@ -461,8 +461,8 @@ async function continueOneForma(page, userDetails, gotNewData) {
                     });
                 }
 
-                const nameProxyList = userDocument + '/name-proxy-email.json';
-                const filename = userDocument + '/oneformaCredentials.json';
+                const nameProxyList = 'file:///' + userDocument + '/name-proxy-email.json';
+                const filename = 'file:///' + userDocument + '/oneformaCredentials.json';
 
                 modifyJsonFile(filename, registedUser);
 
@@ -643,8 +643,8 @@ export default async function extension1(userDetailsArray, createEmail, gotNewDa
                             });
                         }
 
-                        const nameProxyList = userDocument + '/name-proxy-email.json';
-                        const filename = userDocument + '/oneformaCredentials.json';
+                        const nameProxyList = 'file:///' + userDocument + '/name-proxy-email.json';
+                        const filename = 'file:///' + userDocument + '/oneformaCredentials.json';
 
                         modifyJsonFile(filename, registedUser);
 
