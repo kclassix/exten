@@ -22,7 +22,7 @@ async function createNewEmail(registerData, gotNewData) {
     let chromeProfile = 'Person ' + registerData[0].profile;
     const chrome = await chromeLauncher.launch({
         ignoreDefaultFlags: true,
-        chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir, "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+        chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir, "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
     });
     const browserURL = `http://localhost:${chrome.port}`;
     const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
@@ -538,7 +538,7 @@ export default async function extension1(userDetailsArray, createEmail, gotNewDa
             // let chromeProfile = 'Person ' + userDetails.profile;
             const chrome = await chromeLauncher.launch({
                 ignoreDefaultFlags: true,
-                chromeFlags: ["--no-first-run",  "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+                chromeFlags: ["--no-first-run",  "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
 
                 // chromeFlags: ["--disable-gpu", "--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
             });
