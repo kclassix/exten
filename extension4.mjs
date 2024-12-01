@@ -138,6 +138,82 @@ export default function extension4(userDetails, certId) {
 
     oneformaLoginPage = await browser.newPage();
 
+    await oneformaLoginPage.setRequestInterception(true);
+    oneformaLoginPage.on('request', interceptedRequest => {
+
+      if (interceptedRequest.url().includes('ApplyToJobTrans.php') && interceptedRequest.method() === 'POST') {
+        let posttt = interceptedRequest.postData();
+        console.log(posttt)
+        var params = getUrlVars(posttt);
+        if (!isNaN(params.proxy) > 0 || !isNaN(proxy.fraudChance) > 0 || !isNaN(params.vpn) > 0) {
+
+          params.proxy = 0;
+          params.fraudChance = 0;
+          params.vpn = 0;
+
+
+          if (isNaN(params.deviceId[0])) {
+            params.deviceId = 'y' + params.deviceId.slice(1);
+          } else {
+            params.deviceId = 1 + params.deviceId.slice(1);
+          }
+
+          console.log(params)
+
+          var hashes = JSON.stringify(params).replaceAll(/:/g, "=").replaceAll(/,/g, "&").replaceAll(/"/g, "").replaceAll(/{/g, "").replaceAll(/}/g, "");
+
+          interceptedRequest.continue({
+            postData: hashes
+          });
+        }
+      } else {
+        interceptedRequest.continue();
+      }
+      // if (interceptedRequest.url().includes('ipqualityscore')) {
+      //     console.log(interceptedRequest.url())
+      //     interceptedRequest.abort()
+      // } else {
+      //     interceptedRequest.continue();
+      // }
+    });
+
+    browser.on('targetcreated', async target => {
+      const newPage = await target.page();
+      if (newPage) {
+        await newPage.setRequestInterception(true);
+        newPage.on('request', interceptedRequest => {
+          if (interceptedRequest.url().includes('ApplyToJobTrans.php') && interceptedRequest.method() === 'POST') {
+            let posttt = interceptedRequest.postData();
+            console.log(posttt)
+            var params = getUrlVars(posttt);
+            if (!isNaN(params.proxy) > 0 || !isNaN(proxy.fraudChance) > 0 || !isNaN(params.vpn) > 0) {
+
+              params.proxy = 0;
+              params.fraudChance = 0;
+              params.vpn = 0;
+
+
+              if (isNaN(params.deviceId[0])) {
+                params.deviceId = 'y' + params.deviceId.slice(1);
+              } else {
+                params.deviceId = 1 + params.deviceId.slice(1);
+              }
+
+              console.log(params)
+
+              var hashes = JSON.stringify(params).replaceAll(/:/g, "=").replaceAll(/,/g, "&").replaceAll(/"/g, "").replaceAll(/{/g, "").replaceAll(/}/g, "");
+
+              interceptedRequest.continue({
+                postData: hashes
+              });
+            }
+          } else {
+            interceptedRequest.continue();
+          }
+        });
+      }
+    });
+
     await oneformaLoginPage.goto('https://my.oneforma.com/Account/login.php', {
       timeout: 0,
       waitUntil: 'networkidle2'
