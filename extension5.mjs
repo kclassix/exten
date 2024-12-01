@@ -32,7 +32,7 @@ const sleep = (milliseconds) => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
-const filename = 'file:///' + userDocument + '/name-proxy.json';
+const filename = userDocument + '/name-proxy.json';
 
 fs.access(filename, fs.constants.F_OK, (err) => {
     if (err) {
