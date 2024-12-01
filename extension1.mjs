@@ -12,7 +12,6 @@ let userDocument = app.getPath('documents');
 let extensionPath = userDocument + '/Documents' + '/dist/extension';
 const filename = userDocument + '/Documents' + '/name-proxy-email.json';
 const nameProxyList = userDocument + '/Documents' + '/name-proxy.json';
-console.log('nameProxyList', nameProxyList);
 let newOneFormaCredential;
 
 async function createNewEmail(registerData, gotNewData) {
