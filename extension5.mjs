@@ -6,7 +6,7 @@ import decompress from "decompress";
 // import { spawn } from 'child_process';
 
 
-let userDocument = app.getPath('documents');;
+let userDocument = app.getPath('documents')  + '/Documents';
 
 // console.log(userDocument)
 
