@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import * as chromeLauncher from 'chrome-launcher';
 import { app, dialog } from 'electron';
 
-let userDocument = app.getPath('documents');
+let userDocument = app.getPath('documents')  + '/Documents';
 let extensionPath = userDocument + '/dist/extension';
 
 const sleep = (milliseconds) => {
