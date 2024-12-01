@@ -4,48 +4,8 @@ import * as chromeLauncher from 'chrome-launcher';
 import { app, dialog } from 'electron';
 import UserAgent from 'user-agents';
 
-let userDocument = app.getPath('documents');
+let userDocument = app.getPath('documents') + '/Documents';
 let extensionPath = userDocument + '/dist/extension';
-
-
-validarErrores: (error, escenario) => {
-  console.log(`${error.toString()}`.bgRed);
-  if (typeof escenario == `undefined`) {
-    return self.mensajeError(`Error 500 - Objeto indefinido`);
-  }
-  const { TimeoutError } = require('puppeteer/Errors');
-  if (error instanceof TimeoutError) {
-    if (error.toString().search(`Navigation Timeout`) != -1) {
-      return self.mensajeError(`Se produjo un error de <strong> Timeout </strong> al navegar`);
-    }
-    for (pasos in escenario) {
-      for (prop in escenario[pasos]) {
-        if (error.toString().search(escenario[pasos][prop]) != -1) {
-          return self.mensajeError(`Se produjo un error al <strong> no poder localizar </strong> el campo <strong>${escenario[pasos][prop]}</strong>`);
-        }
-      }
-    }
-    return self.mensajeError(`Error 500 - ${error.toString}`);
-  }
-  else if (error instanceof Error) {
-    switch (true) {
-      case (error.toString().includes(`ERR_INTERNET_DISCONNECTED`)):
-        return self.mensajeError(`No hay conexión fisica a la red Local`);
-        break;
-      case (error.toString().includes(`ERR_CONNECTION_TIMED_OUT`)):
-        return self.mensajeError(`La aplicacion no se encuentra en línea`);
-        break;
-      case (error.toString().includes(`ERR_CONNECTION_REFUSED`)):
-        return self.mensajeError(`La dirección de la aplicacion no es correcta`);
-        break;
-      default:
-        return self.mensajeError(`La aplicación a encontrado el ${error}`);
-        break;
-    }
-  }
-  // throw new Error(error);
-}
-
 let oneformaLoginPage;
 let oneformaGrammarExamPage;
 let pageGemini;
