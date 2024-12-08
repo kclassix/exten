@@ -39,6 +39,34 @@ async function checkBeforeRelaunch(question) {
 
     hasLaunchedGemini = true;
 
+    
+await pageChatGpt.goto("https://chatgpt.com/auth/login", {
+  waitUntil: "networkidle2",
+});
+
+await pageChatGpt.evaluate(() => {
+  document
+    .querySelector(
+      "body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)"
+    )
+    .click();
+});
+
+await pageChatGpt.waitForNavigation({ timeout: 0 });
+await pageChatGpt.waitForSelector("#email-input");
+await pageChatGpt.type("#email-input", "ugonnaya2018@gmail.com");
+await sleep(1000);
+await pageChatGpt.click(".continue-btn");
+await sleep(5000);
+
+await pageChatGpt.type("#password", "Emmaorakwue007");
+
+await sleep(1000);
+
+await pageChatGpt.click("._button-login-password");
+
+    await pageChatGpt.waitForNavigation({ timeout: 0 });
+
     await pageChatGpt.goto("https://chatgpt.com/?model=o1-preview", {
       waitUntil: "networkidle2",
       timeout: 0
