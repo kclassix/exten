@@ -120,15 +120,45 @@ export default function extension3(userDetails, certId) {
       const browserURL = `http://localhost:${chrome.port}`;
       const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
       pageGemini = await browser.pages();
-      pageGemini = pageGemini[pageGemini.length - 1];
+      pageChatGpt = pageGemini[pageGemini.length - 1];
 
       hasLaunchedGemini = true;
 
-      pageChatGpt = await browser.newPage();
-      await pageChatGpt.goto("https://chatgpt.com", {
-        waitUntil: "networkidle2",
-        timeout: 0
-      });
+      await pageChatGpt.goto("https://chatgpt.com/auth/login", {
+      waitUntil: "networkidle2",
+    });
+
+    // await pageChatGpt.waitForSelector('body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)');
+    // await pageChatGpt.click('body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)');
+    await sleep(1000);
+
+    await pageChatGpt.evaluate(() => {
+      document
+        .querySelector(
+          "body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)"
+        )
+        .click();
+    });
+
+    await pageChatGpt.waitForNavigation({ timeout: 0 });
+    await pageChatGpt.waitForSelector("#email-input");
+    await page.type("#email-input", "ugonnaya2018@gmail.com");
+    await sleep(1000);
+    await page.click(".continue-btn");
+    await sleep(5000);
+    
+    await page.type("#password", "Emmaorakwue007");
+
+    await sleep(1000);
+
+    await pageChatGpt.click("._button-login-password");
+
+    await pageChatGpt.waitForNavigation({ timeout: 0 });
+
+    await pageChatGpt.goto("https://chatgpt.com", {
+      waitUntil: "networkidle2",
+      timeout: 0
+    });
     };
 
     if (question) {
