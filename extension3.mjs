@@ -129,13 +129,6 @@ export default function extension3(userDetails, certId) {
         waitUntil: "networkidle2",
         timeout: 0
       });
-
-      if (pageChatGpt.url() != 'https://chatgpt.com') {
-        await pageChatGpt.goto("https://chatgpt.com", {
-          waitUntil: "networkidle2",
-          timeout: 0
-        });
-      }
     };
 
     if (question) {
