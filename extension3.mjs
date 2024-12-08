@@ -142,11 +142,11 @@ export default function extension3(userDetails, certId) {
 
     await pageChatGpt.waitForNavigation({ timeout: 0 });
     await pageChatGpt.waitForSelector("#email-input");
-    await pageChatGpt.type("#email-input", "breezyderhamms@gmail.com");
+    await pageChatGpt.type("#email-input", "ugonnaya2018@gmail.com");
     await sleep(1000);
     await pageChatGpt.click(".continue-btn");
     await sleep(5000);
-    await pageChatGpt.type("#password", "moneymindedgpt");
+    await pageChatGpt.type("#password", "Emmaorakwue007");
 
     await sleep(1000);
 
