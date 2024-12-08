@@ -32,12 +32,12 @@ export default function extension3(userDetails, certId) {
 
   async function oneformaLogin(userDetails) {
     let chromeDir = '/Oneforma';
-      let chromeProfile = 'Profile ' + userDetails?.profile;
-      const chrome = await chromeLauncher.launch({
-        ignoreDefaultFlags: true,
-        chromeFlags: ["--disable-gpu", "--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
-        // chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir,  "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
-      });
+    let chromeProfile = 'Profile ' + userDetails?.profile;
+    const chrome = await chromeLauncher.launch({
+      ignoreDefaultFlags: true,
+      chromeFlags: ["--disable-gpu", "--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
+      // chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir,  "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+    });
     const browserURL = `http://localhost:${chrome.port}`;
     const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
 
@@ -46,16 +46,16 @@ export default function extension3(userDetails, certId) {
 
     await checkBeforeRelaunch();
 
-      await pageAuth.authenticate({
-        username: userDetails.proxyUsername,
-        password: userDetails.proxyPassword
-    
-      });
-    
-      await pageAuth.goto("chrome-extension://ncbknoohfjmcfneopnfkapmkblaenokb/popup.html", {
-        timeout: 0,
-        waitUntil: 'networkidle2'
-      });
+    await pageAuth.authenticate({
+      username: userDetails.proxyUsername,
+      password: userDetails.proxyPassword
+
+    });
+
+    await pageAuth.goto("chrome-extension://ncbknoohfjmcfneopnfkapmkblaenokb/popup.html", {
+      timeout: 0,
+      waitUntil: 'networkidle2'
+    });
 
     await pageAuth.goto("https://example.com", {
       timeout: 0,
@@ -139,7 +139,7 @@ export default function extension3(userDetails, certId) {
     };
 
     if (question) {
-    
+
       let promptText;
       let answerBoxInfo
 
@@ -240,13 +240,13 @@ export default function extension3(userDetails, certId) {
 
   async function examGrammar(certId, page) {
     oneformaGrammarExamPage = page;
-  
+
     await oneformaGrammarExamPage.waitForSelector('.suggested-box', { timeout: 0 });
-  
+
     await oneformaGrammarExamPage.click('#all-tab');
-  
+
     await oneformaGrammarExamPage.waitForSelector('.suggested-box', { timeout: 0 });
-  
+
     await oneformaGrammarExamPage.evaluate(async (searchText) => {
       const elements = document.querySelectorAll('.suggested-box .suggested-box-body  .sdescription-box');
       elements.forEach(async (element) => {
@@ -256,109 +256,117 @@ export default function extension3(userDetails, certId) {
       });
     }, certId);
     await oneformaGrammarExamPage.waitForSelector('.modal.fade.show', { timeout: 0 });
-  
-    async function checkExamStatus() {
-      return await oneformaGrammarExamPage.evaluate(() => {
-        if (document.querySelector('#available_certification_container').style.display == 'none') {
-          return 'retry_certification_link';
-        } else {
-          return 'attempt_certification_button';
-        };
-      });
-    };
-    let examStatus = await checkExamStatus();
-  
-    if (examStatus == 'attempt_certification_button') {
-      await oneformaGrammarExamPage.click('#attempt_certification_button');
-    } else if (examStatus == 'retry_certification_link') {
-      await oneformaGrammarExamPage.click('#retry_certification_link');
-    };
-  
+
     async function checkAvailableAttempt() {
       return await oneformaGrammarExamPage.evaluate(() => {
+        console.log(document.querySelector("#CertificationsDetails > div > div > div.modal-body > div > div.col-md-5 > div.container > div:nth-child(2) > div.col-xs-6.text-left").innerText)
         return document.querySelector("#CertificationsDetails > div > div > div.modal-body > div > div.col-md-5 > div.container > div:nth-child(2) > div.col-xs-6.text-left").innerText;
       })
     }
-  
+
     let availableAttempt = await checkAvailableAttempt();
-  
-    // console.log('availableAttempt', availableAttempt);
-  
+
+    await sleep(5000);
+
     if (!availableAttempt.includes('0')) {
-      async function checkExamMove() {
+
+      async function checkExamStatus() {
         return await oneformaGrammarExamPage.evaluate(() => {
-          return document.querySelector('#exam_modal').style.display == 'none';
+          if (document.querySelector('#available_certification_container').style.display == 'none') {
+            return 'retry_certification_link';
+          } else {
+            return 'attempt_certification_button';
+          };
         });
       };
-      let examMove = await checkExamMove();
-  
-      // console.log('examMove', examMove);
-  
-      while (examMove) {
-        await sleep(2000);
-        examMove = await checkExamMove();
+      let examStatus = await checkExamStatus();
+
+      if (examStatus == 'attempt_certification_button') {
+        await oneformaGrammarExamPage.click('#attempt_certification_button');
+      } else if (examStatus == 'retry_certification_link') {
+        await oneformaGrammarExamPage.click('#retry_certification_link');
       };
-  
-      await sleep(5000);
-  
-      await oneformaGrammarExamPage.click('#movetoexam');
-  
-      // console.log('hereeee')
-  
-  
+
+      if (certId.includes('Welcome')) {
+
+        await sleep(5000);
+
+        await oneformaGrammarExamPage.waitForSelector('.arrow-btn', { timeout: 0 });
+        await oneformaGrammarExamPage.click('.arrow-btn');
+      } else {
+        async function checkExamMove() {
+          return await oneformaGrammarExamPage.evaluate(() => {
+            return document.querySelector('#exam_modal').style.display == 'none';
+          });
+        };
+        let examMove = await checkExamMove();
+
+        // console.log('examMove', examMove);
+
+        while (examMove) {
+          await sleep(2000);
+          examMove = await checkExamMove();
+        };
+
+        await sleep(5000);
+
+        await oneformaGrammarExamPage.click('#movetoexam');
+
+      }
+
       let previousQuestion = ''
-  
-      async function checkExamBody() {  
+
+      async function checkExamBody() {
         return await oneformaGrammarExamPage.evaluate(async (previousQuestion) => {
           const sleep = (milliseconds) => {
             return new Promise((resolve) => setTimeout(resolve, milliseconds));
           }
-  
+
           async function checkQuestionBody() {
             try {
               let questionBodyFetch = [document.querySelector('#webapp_frame').contentDocument.documentElement][0].lastElementChild.children[0].children[0].innerText;
-  
+
               return questionBodyFetch;
             } catch (error) {
-  
+
               return '';
             }
           }
-  
+
           let questionBody = await checkQuestionBody();
-  
+
           while (questionBody == undefined || questionBody == null || questionBody == '' || questionBody == previousQuestion) {
             await sleep(3000);
             questionBody = await checkQuestionBody();
           }
-  
+
           return questionBody;
         }, previousQuestion);
       };
-  
+
       let examSubmit = await checkExamBody();
-  
+
       // console.log('examSubmit1', examSubmit);
-  
+
       // previousQuestion = examSubmit;
-  
+
       await sleep(2000);
       async function examLogic() {
-  
+
         async function omoCheck() {
-  
+
           return await oneformaGrammarExamPage.$eval('#webapp_frame', el => {
             return el?.contentDocument?.documentElement.innerHTML;
           });
         };
         let mainResult = await omoCheck();
         let $ = cheerio?.load(mainResult);
-  
+
         let instruction = $('#question_panel > div.panel-body > #question_header').text() + " ";
         let questionBody = $('#question_panel > div.panel-body > #question_container').text();
         let questionOption = " " + $('#question_panel').html();
         let questionIdentifier = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-  
+
         while (previousQuestion == questionBody) {
           await sleep(3000);
           mainResult = await omoCheck();
@@ -367,9 +375,9 @@ export default function extension3(userDetails, certId) {
           questionBody = $('#question_panel > div.panel-body > #question_container').text();
           questionOption = " " + $('#question_panel').html();
         };
-  
+
         previousQuestion = questionBody;
-  
+
         if (questionOption.includes('radio')) {
           const optionsResult = await oneformaGrammarExamPage.evaluate(async (questionOption) => {
             function removeDiacritics(str) {
@@ -392,48 +400,48 @@ export default function extension3(userDetails, certId) {
                 { base: 'Y', letters: /[\u00DD]/g },
                 { base: 'y', letters: /[\u00FD\u00FF]/g }
               ];
-  
+
               for (let i = 0; i < defaultDiacriticsRemovalMap.length; i++) {
                 str = str.replace(defaultDiacriticsRemovalMap[i].letters, defaultDiacriticsRemovalMap[i].base);
               }
               return str;
             };
-  
+
             var wrapper = document.createElement('div');
             wrapper.innerHTML = questionOption;
             var returnedOptions = wrapper.querySelectorAll('.custom-control-label');
-  
+
             let foundOptions = [];
             returnedOptions.forEach(option => {
               foundOptions.push(removeDiacritics(option?.innerText.toLowerCase()));
             })
-  
+
             return foundOptions;
           }, questionOption);
-  
+
           // console.log('optionsResult', optionsResult);
-  
+
           let questionInit = '';
           let questionNum = 0;
           optionsResult.forEach((option) => {
             questionInit += `${questionIdentifier[questionNum]})${option} `;
             questionNum++
           })
-  
+
           let questionTemplate = {
             Task: instruction,
             Body: questionBody,
             Options: 'Options: ' + questionInit
           };
-  
+
           // console.log('questionTemplate', questionTemplate);
-  
+
           let rere = await checkBeforeRelaunch(questionTemplate);
-  
+
           // console.log('rere', await rere);
-  
+
           let rereIndex;
-  
+
           if (rere?.includes('A')) {
             rereIndex = 0;
           } else if (rere?.includes('B')) {
@@ -445,21 +453,21 @@ export default function extension3(userDetails, certId) {
           } else if (rere?.includes('E')) {
             rereIndex = 4;
           }
-  
+
           // console.log('rereIndex', rereIndex)
           const response = await oneformaGrammarExamPage.evaluate((rereIndex) => {
             [document.querySelector('#webapp_frame').contentDocument.documentElement][0].lastElementChild.children[0].children[0].children[0].children[0].children[0].children[1].children[2].children[rereIndex].firstElementChild.click();
-  
+
             setTimeout(() => {
               [document.querySelector('#webapp_frame').contentDocument.documentElement][0].lastElementChild.children[0].children[0].children[0].children[0].children[0].children[1].lastElementChild.children[0].click();
             }, 1000);
           }, rereIndex);
-  
+
           setTimeout(() => {
             examLogic();
           }, 10000);
-  
-        } 
+
+        }
       };
       examLogic();
     };
