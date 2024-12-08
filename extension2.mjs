@@ -39,45 +39,38 @@ async function checkBeforeRelaunch(question) {
 
     hasLaunchedGemini = true;
 
-    
-await pageChatGpt.goto("https://chatgpt.com/auth/login", {
-  waitUntil: "networkidle2",
-});
+    await pageChatGpt.goto("https://chatgpt.com/auth/login", {
+      waitUntil: "networkidle2",
+    });
 
-await pageChatGpt.evaluate(() => {
-  document
-    .querySelector(
-      "body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)"
-    )
-    .click();
-});
+    await pageChatGpt.waitForSelector('body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)');
 
-await pageChatGpt.waitForNavigation({ timeout: 0 });
-await pageChatGpt.waitForSelector("#email-input");
-await pageChatGpt.type("#email-input", "ugonnaya2018@gmail.com");
-await sleep(1000);
-await pageChatGpt.click(".continue-btn");
-await sleep(5000);
+    // await pageChatGpt.evaluate(() => {
+    //   document
+    //     .querySelector(
+    //       "body > div > div.relative.flex.grow.flex-col.items-center.justify-between.bg-white.px-5.py-8.text-black.dark\\:bg-black.dark\\:text-white.sm\\:rounded-t-\\[30px\\].md\\:rounded-none.md\\:px-6 > div.relative.flex.w-full.grow.flex-col.items-center.justify-center > div > div > button:nth-child(1)"
+    //     )
+    //     .click();
+    // });
 
-await pageChatGpt.type("#password", "Emmaorakwue007");
+    await pageChatGpt.waitForNavigation({ timeout: 0 });
+    await pageChatGpt.waitForSelector("#email-input");
+    await pageChatGpt.type("#email-input", "breezyderhamms@gmail.com");
+    await sleep(1000);
+    await pageChatGpt.click(".continue-btn");
+    await sleep(5000);
+    await pageChatGpt.type("#password", "moneymindedgpt");
 
-await sleep(1000);
+    await sleep(1000);
 
-await pageChatGpt.click("._button-login-password");
+    await pageChatGpt.click("._button-login-password");
 
     await pageChatGpt.waitForNavigation({ timeout: 0 });
 
-    await pageChatGpt.goto("https://chatgpt.com/?model=o1-preview", {
+    await pageChatGpt.goto("https://chatgpt.com/?model=gpt-4o-canmore", {
       waitUntil: "networkidle2",
       timeout: 0
     });
-
-    if (pageChatGpt.url() != 'https://chatgpt.com/?model=o1-preview') {
-      await pageChatGpt.goto("https://chatgpt.com/?model=o1-preview", {
-        waitUntil: "networkidle2",
-        timeout: 0
-      });
-    }
 
     let instruction = 'For each question you will see a sentence in the source language and underneath an initial translation has been provided. But, this initial translation will contain one absolute/objective error that can be fixed with one edit. spot the only single error highlight and correct the single error only. Note; there is only a single error do not correct more than one word as it only contains one word error. don’t correct the sentence structure just the one objective error. return only the Revised Translation.'
 
