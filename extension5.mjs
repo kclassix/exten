@@ -131,9 +131,11 @@ async function getNames(country, done) {
             fetchData = await getData();
         };
 
-        await pageChatGpt.bringToFront();
-        await sleep(1000);
-        await browserGPT.close();
+         if (done) {
+            await pageChatGpt.bringToFront();
+            await sleep(1000);
+            await browserGPT.close();
+        }
 
         fetchDataLength = fetchData?.length;
 
