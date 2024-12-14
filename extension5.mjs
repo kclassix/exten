@@ -40,9 +40,8 @@ fs.access(filename, fs.constants.F_OK, (err) => {
     }
 });
 
-
-export default async function createProxyNName(countryList, gotNewData) {
-
+export default async function createProxyNName(countryList, gotNewData, userDocumentSent) {
+    userDocument = userDocumentSent;
     initIproyal(countryList, gotNewData);
 
 };
