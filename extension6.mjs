@@ -29,8 +29,6 @@ let sentInstruction = false;
 export default async function extension6({ reconnectValue }) {
     sentInstruction = false;
 
-    dialog.showErrorBox('omo', `${JSON.stringify(reconnectValue)}`);
-
     function reconnectReading() {
 
         dialog.showErrorBox('Reading', `yooo`);
