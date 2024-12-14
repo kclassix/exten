@@ -7,7 +7,6 @@ const sleep = (milliseconds) => {
 }
 
 let userDocument = '';
-let extensionPath = '';
 let filename = '';
 let nameProxyList = '';
 
@@ -21,7 +20,7 @@ let proxyData = {
 async function createNewEmail(registerData, gotNewData, sendReconnect) {
     const chrome = await chromeLauncher.launch({
         ignoreDefaultFlags: true,
-        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
     });
     const browserURL = `http://localhost:${chrome.port}`;
     proxyData.oneForma = browserURL;
@@ -516,7 +515,7 @@ async function continueOneForma(page, userDetails, gotNewData) {
 async function createOneFormaNormally(userDetails, gotNewData, sendReconnect) {
     const chrome = await chromeLauncher.launch({
         ignoreDefaultFlags: true,
-        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
     });
     const browserURL = `http://localhost:${chrome.port}`;
     proxyData.oneForma = browserURL;
@@ -689,7 +688,6 @@ async function initGpt(sendReconnect) {
 
 export default async function extension1(userDetailsArray, createEmail, gotNewData, userDocumentSent, sendReconnect) {
     userDocument = userDocumentSent;
-    extensionPath = userDocument + '/dist/extension';
     filename = userDocument + '/name-proxy-email.json';
     nameProxyList = userDocument + '/name-proxy.json';
 
