@@ -1293,10 +1293,14 @@ export default async function extension6({ reconnectValue }) {
         } else if (examTitle.toLowerCase().includes('guidance')) {
             // oneformaGrammarExamPage = pages[pages.length - 1];
             oneformaCertificationGuidance();
-        } else if (examTitle.toLowerCase().includes('acceptability')) {
-            // oneformaGrammarExamPage = pages[pages.length - 1];
-            // oneformaGrammarExamPage = pages[pages.length - 1];
-            examsAcceptability();
+        } 
+        // else if (examTitle.toLowerCase().includes('acceptability')) {
+        //     // oneformaGrammarExamPage = pages[pages.length - 1];
+        //     // oneformaGrammarExamPage = pages[pages.length - 1];
+        //     examsAcceptability();
+        // }
+        else if (examTitle.toLowerCase().includes('welcome')) {
+            reconnectReading();
         };
     }
 
