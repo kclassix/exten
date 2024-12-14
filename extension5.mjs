@@ -399,7 +399,7 @@ async function initIproyal(countryList, gotNewData) {
 
             async function modifyJsonFile(filename, newData) {
 
-                await sleep(2000)
+                // await sleep(2000)
                 fs.readFile(filename, 'utf8', (err, data) => {
                     if (err) {
                         console.error('Error reading file:', err);
