@@ -1,66 +1,84 @@
 import puppeteer from "puppeteer";
 import *  as chromeLauncher from "chrome-launcher";
 import fs from 'fs';
-import { app, dialog } from 'electron';
-import UserAgent from 'user-agents';
 
 const sleep = (milliseconds) => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-let userDocument = app.getPath('documents') + '/Documents';
-let extensionPath = userDocument + '/dist/extension';
-const filename = userDocument + '/name-proxy-email.json';
-const nameProxyList = userDocument + '/name-proxy.json';
-let newOneFormaCredential;
+let userDocument = '';
+let extensionPath = '';
+let filename = '';
+let nameProxyList = '';
 
-async function createNewEmail(registerData, gotNewData) {
+let proxyData = {
+    examType: 'Reading',
+    oneForma: '',
+    gpt: ''
+};
 
-    // dialog.showErrorBox('omo', `${registerData}`)
 
-    let chromeDir = '/' + registerData[0].firstname;
-    let chromeProfile = 'Person ' + registerData[0].profile;
+async function createNewEmail(registerData, gotNewData, sendReconnect) {
     const chrome = await chromeLauncher.launch({
         ignoreDefaultFlags: true,
-        chromeFlags: ["--disable-gpu", "--no-first-run", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir, "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
+        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
     });
     const browserURL = `http://localhost:${chrome.port}`;
+    proxyData.oneForma = browserURL;
     const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
 
     const pages = await browser.pages();
     const page = pages[pages.length - 1];
+    let index = 0;
 
-    // await page.setRequestInterception(true);
-    // page.on("request", (request) => {
-    //     if (request.resourceType() === "image") {
-    //         // console.log("Blocking image request: " + request.url());
-    //         request.abort();
-    //     } else {
-    //         request.continue();
-    //     }
-    // });
+
     await page.authenticate({
-        username: registerData[0].proxyUsername,
-        password: registerData[0].proxyPassword
+        username: registerData[index].proxyUsername,
+        password: registerData[index].proxyPassword
 
     });
-
-    await page.goto("chrome-extension://ncbknoohfjmcfneopnfkapmkblaenokb/popup.html", {
-        timeout: 0,
-        waitUntil: 'networkidle2'
-    });
-
 
     await page.goto('https://signup.mail.com/#.7518-header-signup1-1', {
         timeout: 0,
         waitUntil: 'networkidle2'
     });
 
-    await page.evaluate((registerData) => {
-        console.log(registerData)
-    }, registerData)
+    let currentPage = page.url();
+    console.log('currentPage', currentPage)
+    console.log('user', registerData[index])
+
+
+    async function changeProxy() {
+        if (index < registerData.length) {
+            index += 1;
+        }
+        console.log('user', registerData[index])
+
+        await page.authenticate({
+            username: registerData[index].proxyUsername,
+            password: registerData[index].proxyPassword
+        });
+
+        // console.log(registerData[index])
+        await page.goto('https://signup.mail.com/#.7518-header-signup1-1', {
+            timeout: 0,
+            waitUntil: 'networkidle2'
+        });
+
+        console.log('currentPage', page.url())
+
+        return page.url();
+    }
+
+    while (currentPage.includes('support')) {
+
+        currentPage = await changeProxy();
+    };
 
     let currentTabs = pages.length;
+
+    console.log('emails', registerData.length, 'tabs', currentTabs)
+
 
     while (currentTabs < registerData.length) {
         let newTab = await browser.newPage()
@@ -89,15 +107,6 @@ async function createNewEmail(registerData, gotNewData) {
         newNo += 1
         // console.log(newNo)
     }
-
-    // if (newNo == (allPages.length - 1)) {
-    //     let oneFormaPage = await browser.newPage();
-
-    //     await oneFormaPage.goto('https://my.oneforma.com/Account/register', {
-    //         timeout: 0,
-    //         waitUntil: 'networkidle2'
-    //     })
-    // }
 
     async function task(page, userData) {
         let genderSelect = userData.gender;
@@ -221,6 +230,10 @@ async function createNewEmail(registerData, gotNewData) {
         continueForm();
 
         async function continueForm() {
+            let randomNumber = Math.floor(Math.random() * (999999 - 100000 + 1));
+            if (randomNumber.toString().length != 6) {
+                randomNumber = Number(randomNumber.toString() + Math.floor(Math.random() * (9 - 1)).toString());
+            }
 
             if (genderSelect == 'female') {
                 await page.click("body > onereg-app > div > onereg-form > div > div > form > section > section.form__panel--personal-info > onereg-progress-meter > div.onereg-progress-meter__grow-container > onereg-personal-info > fieldset > div.l-flex.l-horizontal.l-wrap.a-mb-space-1 > div > onereg-radio-wrapper:nth-child(1) > pos-input-radio > label > input");
@@ -260,7 +273,7 @@ async function createNewEmail(registerData, gotNewData) {
             );
             await page.type(
                 "body > onereg-app > div > onereg-form > div > div > form > section > section.form__panel--password-recovery > onereg-password-recovery > fieldset > onereg-progress-meter > div.onereg-progress-meter__grow-container > onereg-form-row:nth-child(4) > div > div > div > pos-input.pos-input.l-flex-1 > input",
-                "2015" + Math.floor(Math.random() * (999999 - 100000 + 1))
+                "2015" + randomNumber.toString()
             );
             await page.select(
                 "body > onereg-app > div > onereg-form > div > div > form > section > section.form__panel--personal-info > onereg-progress-meter > div.onereg-progress-meter__grow-container > onereg-personal-info > fieldset > fieldset > onereg-form-row > div > div > pos-input > select",
@@ -291,57 +304,18 @@ async function createNewEmail(registerData, gotNewData) {
                 waitToGetEmail = await getRegisteredEmail();
             };
 
-
-
-
-            // return 
-
             let registedUser = {
                 proxyUsername: userData.proxyUsername,
                 proxyPassword: userData.proxyPassword,
-                country: userData.proxyCountry,
+                proxyCountry: userData.proxyCountry,
                 proxyState: userData.proxyState,
                 gender: userData.gender,
-                profile: userData.profile,
+                // profile: userData.profile,
                 firstname: firstName,
                 lastname: lastName,
                 password: 'stupidmoneyBsf@',
                 emailAddress: waitToGetEmail
             };
-
-            if (page == allPages[0]) {
-                newOneFormaCredential = registedUser;
-            }
-
-            if (page == allPages[allPages.length - 1]) {
-                for (let i = 1; i < allPages.length; i++) {
-                    await allPages[i].close();
-                }
-                let oneFormaPage = await browser.newPage();
-
-                // await oneFormaPage.setRequestInterception(true);
-                // oneFormaPage.on("request", (request) => {
-                //     if (request.resourceType() === "image") {
-                //         // console.log("Blocking image request: " + request.url());
-                //         request.abort();
-                //     } else {
-                //         request.continue();
-                //     }
-                // });
-
-                const userAgent = new UserAgent({ deviceCategory: 'desktop' }); // You can specify the device category
-
-                const randomUserAgent = userAgent.toString();
-
-                await oneFormaPage.setUserAgent(randomUserAgent);
-
-                await oneFormaPage.goto('https://my.oneforma.com/Account/register', {
-                    timeout: 0,
-                    waitUntil: 'networkidle2'
-                })
-
-                continueOneForma(oneFormaPage, newOneFormaCredential, gotNewData)
-            }
 
 
             function modifyJsonFile(filename, newData) {
@@ -385,7 +359,6 @@ async function createNewEmail(registerData, gotNewData) {
                                 } else {
                                     console.log(userToRemove, ' removed successfully!');
                                     gotNewData('done');
-
                                 }
                             });
                         }
@@ -396,6 +369,11 @@ async function createNewEmail(registerData, gotNewData) {
 
             modifyJsonFile(filename, registedUser);
 
+            createOneFormaNormally(registedUser, gotNewData, sendReconnect)
+
+            // continueOneForma(oneFormaPage, registedUser, gotNewData);
+
+
 
         }
         // return (newNo + 1);
@@ -403,6 +381,7 @@ async function createNewEmail(registerData, gotNewData) {
 }
 
 async function continueOneForma(page, userDetails, gotNewData) {
+
     await page.type("#firstname", userDetails.firstname);
     await page.type("#lastname", userDetails.lastname);
     await page.type("#username", userDetails.firstname + userDetails.lastname);
@@ -418,7 +397,7 @@ async function continueOneForma(page, userDetails, gotNewData) {
         let el = document.querySelector('#select2-country-results');
         for (let i = 0; i < el.children.length; i++) {
             // const element = array[index];
-            if (el.children[i].innerText.toLowerCase() == userDetails.country.toLowerCase()) {
+            if (el.children[i].innerText.toLowerCase() == userDetails.proxyCountry.toLowerCase()) {
                 return i
             }
 
@@ -428,16 +407,22 @@ async function continueOneForma(page, userDetails, gotNewData) {
 
     await sleep(1000);
 
-    await page.click(`ul > li:nth-child(${countryCount + 1})`);
+    if (!isNaN(Number(countryCount + 1))) {
+        await page.click(`ul > li:nth-child(${countryCount + 1})`);
 
-    sleep(2000);
-    await page.click("#next-btn");
+        sleep(1000);
+        await page.click("#next-btn");
+    } else {
+        await page.keyboard.type(userDetails.proxyCountry.toLowerCase());
+
+        await page.keyboard.press('Enter');
+        sleep(1000);
+        await page.click("#next-btn");
+    };
 
 
     async function getRegisteredEmail() {
         if (page.url().includes('Account/email_activation')) {
-            // await sleep(3000);
-            // return registeredEmail;
             function saveDataToNew(registedUser) {
                 function modifyJsonFile(filename, newData) {
                     fs.readFile(filename, 'utf8', (err, data) => {
@@ -455,7 +440,6 @@ async function continueOneForma(page, userDetails, gotNewData) {
                             } else {
                                 console.log(newData, ' added successfully!');
                                 removeNewlyAddedData(newData);
-                                // gotNewData('done');
                             }
                         });
                     });
@@ -503,202 +487,219 @@ async function continueOneForma(page, userDetails, gotNewData) {
 
     let waitToGetEmail = await getRegisteredEmail();
 
-    console.log('waitToGetEmail111', waitToGetEmail);
     while (!waitToGetEmail) {
         await sleep(2000);
         waitToGetEmail = await getRegisteredEmail();
     };
 
-    // await sleep(2000);
-    // await page.goto('https://mail.com', {
-    //     timeout: 0,
-    //     waitUntil: 'networkidle2'
-    // })
+    await sleep(2000);
+    await page.goto("https://www.mail.com/#.7518-header-navlogin2-1", {
+        waitUntil: "networkidle2",
+        timeout: 0
+    });
+    let pageUrl = page.url();
+    while (!pageUrl.includes('https://www.mail.com/#.7518-header-navlogin2-1')) {
+        await page.goto("https://www.mail.com/#.7518-header-navlogin2-1", {
+            waitUntil: "networkidle2",
+            timeout: 0
+        });
+        pageUrl = page.url();
+    }
+    await page.type('#login-email', userDetails.emailAddress);
+    await page.type('#login-password', userDetails.password);
+
+    await sleep(1000);
+    await page.click('#header-login-box > form > button');
 
 }
 
+async function createOneFormaNormally(userDetails, gotNewData, sendReconnect) {
+    const chrome = await chromeLauncher.launch({
+        ignoreDefaultFlags: true,
+        chromeFlags: ["--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
+    });
+    const browserURL = `http://localhost:${chrome.port}`;
+    proxyData.oneForma = browserURL;
+    // sendReconnect(proxyData);
+    const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
 
-export default async function extension1(userDetailsArray, createEmail, gotNewData) {
-    // let userDocument = app.getPath('documents');
-    if (createEmail) {
-        createNewEmail(JSON.parse(userDetailsArray), gotNewData);
-    } else {
-        let emailListArray = JSON.parse(userDetailsArray);
+    const pages = await browser.pages();
+    const page = pages[pages.length - 1];
 
-        for (let i = 0; i < emailListArray.length; i++) {
-            setTimeout(() => {
-                // let emailListArray = JSON.parse(emailList);
-
-                createOneFormaNormally(emailListArray[i], gotNewData);
-            }, 2000 * i);
+    function getUrlVars(url) {
+        var hash;
+        var myJson = {};
+        var hashes = url.split('&');
+        for (var i = 0; i < hashes.length; i++) {
+          hash = hashes[i].split('=');
+          myJson[hash[0]] = hash[1];
         }
+        return myJson;
+      };
 
-        async function createOneFormaNormally(userDetails, gotNewData) {
-            let chromeDir = '/' + userDetails.firstname;
-            // let chromeProfile = 'Person ' + userDetails.profile;
-            const chrome = await chromeLauncher.launch({
-                ignoreDefaultFlags: true,
-                chromeFlags: ["--no-first-run",  "--silent-debugger-extension-api", "--enable-extension", "--load-extension=extension", '--proxy-server=geo.iproyal.com:12321']
+    await page.setRequestInterception(true);
+    page.on('request', interceptedRequest => {
 
-                // chromeFlags: ["--disable-gpu", "--no-first-run", "--silent-debugger-extension-api", "--enable-extension", "--load-extension=" + extensionPath, '--proxy-server=geo.iproyal.com:12321']
-            });
-            const browserURL = `http://localhost:${chrome.port}`;
-            const browser = await puppeteer.connect({ browserURL, defaultViewport: null });
+        if (interceptedRequest.url().includes('ApplyToJobTrans.php') && interceptedRequest.method() === 'POST') {
+            let posttt = interceptedRequest.postData();
+            console.log(posttt)
+            var params = getUrlVars(posttt);
+            if (!isNaN(params.proxy) > 0 || !isNaN(proxy.fraudChance) > 0 || !isNaN(params.vpn) > 0) {
 
-            const pages = await browser.pages();
-            const pageAuth = pages[pages.length - 1];
-
-
-            await pageAuth.authenticate({
-                username: userDetails.proxyUsername,
-                password: userDetails.proxyPassword
-
-            });
+                params.proxy = 0;
+                params.fraudChance = 0;
+                params.vpn = 0;
 
 
-
-            await pageAuth.goto("chrome-extension://ncbknoohfjmcfneopnfkapmkblaenokb/popup.html", {
-                timeout: 0,
-                waitUntil: 'networkidle2'
-            });
-
-            await pageAuth.goto("https://example.com", {
-                timeout: 0,
-                waitUntil: 'networkidle2'
-            });
-
-            await pageAuth.close();
-
-            const page = await browser.newPage();
-
-            // await page.setRequestInterception(true);
-            // page.on("request", (request) => {
-            //     if (request.resourceType() === "image") {
-            //         // console.log("Blocking image request: " + request.url());
-            //         request.abort();
-            //     } else {
-            //         request.continue();
-            //     }
-            // });
-
-            await page.goto('https://my.oneforma.com/Account/register', {
-                timeout: 300000,
-                waitUntil: 'networkidle2'
-            });
-
-
-            await page.type("#firstname", userDetails.firstname);
-            await page.type("#lastname", userDetails.lastname);
-            await page.type("#username", userDetails.firstname + userDetails.lastname);
-            await page.type("#email", userDetails.emailAddress);
-            await page.type("#passwordbox", userDetails.password);
-            await page.type("#confirmpasswordbox", userDetails.password);
-            await page.type("#city_of_residence", userDetails.proxyState);
-            await sleep(2000);
-
-            await page.click("#select2-country-container")
-            // await page.waitForSelector('#select2-country-results')
-            let countryCount = await page.evaluate((userDetails) => {
-                let el = document.querySelector('#select2-country-results');
-                for (let i = 0; i < el.children.length; i++) {
-                    // const element = array[index];
-                    if (el.children[i].innerText.toLowerCase() == userDetails.country.toLowerCase()) {
-                        return i
-                    }
-
-                }
-            }, userDetails);
-
-
-            await sleep(1000);
-
-            await page.click(`ul > li:nth-child(${countryCount + 1})`);
-
-            sleep(2000);
-            await page.click("#next-btn");
-
-
-            async function getRegisteredEmail() {
-                if (page.url().includes('Account/email_activation')) {
-                    function saveDataToNew(registedUser) {
-                        function modifyJsonFile(filename, newData) {
-                            fs.readFile(filename, 'utf8', (err, data) => {
-                                if (err) {
-                                    console.error('Error reading file:', err);
-                                    return;
-                                }
-
-                                let jsonData = JSON.parse(data);
-                                jsonData.push(newData);
-
-                                fs.writeFile(filename, JSON.stringify(jsonData, null, 2), async (err) => {
-                                    if (err) {
-                                        console.error('Error writing file:', err);
-                                    } else {
-                                        console.log(newData, ' added successfully!');
-                                        removeNewlyAddedData(newData);
-                                        // gotNewData('done');
-                                    }
-                                });
-                            });
-                        }
-
-                        const nameProxyList = userDocument + '/name-proxy-email.json';
-                        const filename = userDocument + '/oneformaCredentials.json';
-
-                        modifyJsonFile(filename, registedUser);
-
-                        async function removeNewlyAddedData(userToRemove) {
-
-                            fs.readFile(nameProxyList, 'utf8', (err, data) => {
-                                if (err) {
-                                    console.error('Error reading file:', err);
-                                    return;
-                                }
-                                let jsonData = JSON.parse(data);
-
-                                for (let i = 0; i < jsonData.length; i++) {
-                                    if (jsonData[i].firstname == userToRemove.firstname && jsonData[i].lastname == userToRemove.lastname) {
-                                        jsonData.splice(i, 1);
-
-                                        fs.writeFile(nameProxyList, JSON.stringify(jsonData, null, 2), (err) => {
-                                            if (err) {
-                                                console.error('Error writing file:', err);
-                                            } else {
-                                                console.log(userToRemove, ' removed successfully!');
-                                                gotNewData('done');
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-
-                        }
-                    }
-                    saveDataToNew(userDetails);
-                    return true
+                if (isNaN(params.deviceId[0])) {
+                    params.deviceId = 'y' + params.deviceId.slice(1);
                 } else {
-                    return false;
+                    params.deviceId = 1 + params.deviceId.slice(1);
                 }
+
+                console.log(params)
+
+                var hashes = JSON.stringify(params).replaceAll(/:/g, "=").replaceAll(/,/g, "&").replaceAll(/"/g, "").replaceAll(/{/g, "").replaceAll(/}/g, "");
+
+                interceptedRequest.continue({
+                    postData: hashes
+                });
+            }
+        } else {
+            interceptedRequest.continue();
+        }
+    });
+
+    browser.on('targetcreated', async target => {
+        const newPage = await target.page();
+        if (newPage) {
+            await newPage.setRequestInterception(true);
+            newPage.on('request', interceptedRequest => {
+                if (interceptedRequest.url().includes('ApplyToJobTrans.php') && interceptedRequest.method() === 'POST') {
+                    let posttt = interceptedRequest.postData();
+                    console.log(posttt)
+                    var params = getUrlVars(posttt);
+                    if (!isNaN(params.proxy) > 0 || !isNaN(proxy.fraudChance) > 0 || !isNaN(params.vpn) > 0) {
+
+                        params.proxy = 0;
+                        params.fraudChance = 0;
+                        params.vpn = 0;
+
+
+                        if (isNaN(params.deviceId[0])) {
+                            params.deviceId = 'y' + params.deviceId.slice(1);
+                        } else {
+                            params.deviceId = 1 + params.deviceId.slice(1);
+                        }
+
+                        console.log(params)
+
+                        var hashes = JSON.stringify(params).replaceAll(/:/g, "=").replaceAll(/,/g, "&").replaceAll(/"/g, "").replaceAll(/{/g, "").replaceAll(/}/g, "");
+
+                        interceptedRequest.continue({
+                            postData: hashes
+                        });
+                    }
+                } else {
+                    interceptedRequest.continue();
+                }
+            });
+
+            if (newPage.url().includes('deref-mail.com')) {
+                await sleep(4000);
+
+                let redirectResult = newPage.url();
+
+                while (!redirectResult.includes('emailactivated=1')) {
+                    await sleep(2000);
+                    redirectResult = newPage.url();
+                };
+
+                initGpt(sendReconnect);
+
+                await newPage.waitForSelector('#form-email', { timeout: 0 });
+                await newPage.type("#form-email", userDetails.emailAddress);
+                await newPage.type("#form-password", userDetails.password);
+                await sleep(4000);
+                await newPage.click("#login_btn");
+
+                while (redirectResult.includes('emailactivated=1')) {
+                await sleep(4000);
+                    await newPage.click("#login_btn");
+                    await sleep(3000);
+                    redirectResult = newPage.url();
+                };
+
+
+                await page.goto('https://my.oneforma.com/UserPortal/certifications', {
+                    timeout: 0,
+                    waitUntil: 'networkidle2'
+                });
+
 
             }
-
-            let waitToGetEmail = await getRegisteredEmail();
-
-            console.log('waitToGetEmail111', waitToGetEmail);
-            while (!waitToGetEmail) {
-                await sleep(2000);
-                waitToGetEmail = await getRegisteredEmail();
-            };
-
-            await sleep(2000);
-            await page.goto('https://mail.com', {
-                timeout: 0,
-                waitUntil: 'networkidle2'
-            })
+        }
+    });
 
 
-        };
+    await page.authenticate({
+        username: userDetails.proxyUsername,
+        password: userDetails.proxyPassword
+
+    });
+
+    await page.goto("chrome-extension://ncbknoohfjmcfneopnfkapmkblaenokb/popup.html", {
+        timeout: 0,
+        waitUntil: 'networkidle2'
+    });
+
+    await page.goto("https://example.com", {
+        timeout: 0,
+        waitUntil: 'networkidle2'
+    });
+
+
+    await page.goto('https://my.oneforma.com/Account/register', {
+        timeout: 0,
+        waitUntil: 'networkidle2'
+    });
+
+    continueOneForma(page, userDetails, gotNewData)
+};
+
+async function initGpt(sendReconnect) {
+    let chromeDir = '/Gemini';
+    let chromeProfile = 'Person 2';
+    const chrome = await chromeLauncher.launch({
+        ignoreDefaultFlags: true,
+        chromeFlags: ["--no-first-run", "--disable-gpu", "--profile-directory=" + chromeProfile, "--user-data-dir=" + userDocument + chromeDir],
+    });
+    const browserURL = `http://localhost:${chrome.port}`;
+    proxyData.gpt = browserURL;
+    sendReconnect(proxyData);
+    const browserGpt = await puppeteer.connect({ browserURL, defaultViewport: null });
+    let pageGemini = await browserGpt.pages();
+    let pageChatGpt = pageGemini[pageGemini.length - 1];
+
+    await pageChatGpt.goto("https://chatgpt.com", {
+        waitUntil: "networkidle2",
+        timeout: 0
+    });
+}
+
+export default async function extension1(userDetailsArray, createEmail, gotNewData, userDocumentSent, sendReconnect) {
+    userDocument = userDocumentSent;
+    extensionPath = userDocument + '/dist/extension';
+    filename = userDocument + '/name-proxy-email.json';
+    nameProxyList = userDocument + '/name-proxy.json';
+
+    if (createEmail) {
+        createNewEmail(userDetailsArray, gotNewData, sendReconnect);
+    } else {
+        for (let i = 0; i < userDetailsArray.length; i++) {
+            createOneFormaNormally(userDetailsArray[i], gotNewData);
+        }
+        
     };
 
 };
